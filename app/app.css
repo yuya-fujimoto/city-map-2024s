@@ -259,7 +259,7 @@ i {
 
 #detail {
   flex: 1;
-  padding: 2rem 4rem;
+  /* padding: 2rem 4rem; */
   width: 100%;
 }
 
@@ -270,7 +270,9 @@ i {
 }
 
 #contact {
-  max-width: 40rem;
+  /* max-width: 40rem; */
+  width: 100%;
+  height: 100%;
   display: flex;
 }
 
