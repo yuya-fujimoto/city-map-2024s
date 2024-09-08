@@ -15,13 +15,8 @@ import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 
 import appStylesHref from './app.css?url';
 
-import { createEmptyContact, getContacts } from './data';
+import { getCityData } from './data';
 import { useEffect } from 'react';
-
-export const action = async () => {
-  const contact = await createEmptyContact();
-  return json({ contact });
-};
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: appStylesHref },
@@ -30,12 +25,12 @@ export const links: LinksFunction = () => [
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const q = url.searchParams.get('q');
-  const contacts = await getContacts(q);
-  return json({ contacts, q });
+  const cityData = await getCityData(q);
+  return json({ cityData, q });
 };
 
 export default function App() {
-  const { contacts, q } = useLoaderData<typeof loader>();
+  const { cityData, q } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const submit = useSubmit();
   const searching =
@@ -82,29 +77,19 @@ export default function App() {
               />
               <div id="search-spinner" aria-hidden hidden={!searching} />
             </Form>
-            <Form method="post">
-              <button type="submit">New</button>
-            </Form>
           </div>
           <nav>
-            {contacts.length ? (
+            {cityData.length ? (
               <ul>
-                {contacts.map((contact) => (
-                  <li key={contact.id}>
+                {cityData.map((data) => (
+                  <li key={data.id}>
                     <NavLink
                       className={({ isActive, isPending }) =>
                         isActive ? 'active' : isPending ? 'pending' : ''
                       }
-                      to={`contacts/${contact.id}`}
+                      to={`data/${data.id}`}
                     >
-                      {contact.first || contact.last ? (
-                        <>
-                          {contact.first} {contact.last}
-                        </>
-                      ) : (
-                        <i>No Name</i>
-                      )}{' '}
-                      {contact.favorite ? <span>★</span> : null}
+                      <>{data.title}</>
                     </NavLink>
                   </li>
                 ))}

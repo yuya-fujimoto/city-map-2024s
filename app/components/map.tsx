@@ -1,31 +1,67 @@
-import * as React from 'react';
 import MapGl from 'react-map-gl';
 import { DeckGL } from '@deck.gl/react';
 import { HexagonLayer } from '@deck.gl/aggregation-layers';
 
-export function Map({ mapboxAccessToken }: { mapboxAccessToken: string }) {
+const glConfig: Record<
+  'nyc' | 'sf',
+  {
+    initialViewState: {
+      longitude: number;
+      latitude: number;
+      zoom: number;
+    };
+    data: string;
+    getPosition: (d: any) => [number, number];
+  }
+> = {
+  nyc: {
+    data: 'https://data.cityofnewyork.us/resource/5rq2-4hqu.json?$limit=1000&boroname=Manhattan',
+    getPosition: (d) => {
+      return [d.the_geom.coordinates[0], d.the_geom.coordinates[1]];
+    },
+    initialViewState: {
+      longitude: -74.0104826,
+      latitude: 40.7454851,
+      zoom: 11,
+    },
+  },
+  sf: {
+    data: 'https://data.sfgov.org/resource/5kya-mfst.json?$limit=1000',
+    getPosition: (d) => {
+      return [d.polygon.coordinates[0][0][0], d.polygon.coordinates[0][0][1]];
+    },
+    initialViewState: {
+      longitude: -122.4194,
+      latitude: 37.7749,
+      zoom: 11,
+    },
+  },
+};
+
+export function Map({
+  mapboxAccessToken,
+  cityDataId,
+}: {
+  mapboxAccessToken: string;
+  cityDataId: 'nyc' | 'sf';
+}) {
+  const selectedConfig = glConfig[cityDataId];
+
   const layers = [
     new HexagonLayer<any>({
       id: 'heatmap',
-      // colorRange,
-      // coverage,
-      data: 'https://data.cityofnewyork.us/resource/5rq2-4hqu.json?$limit=1000&boroname=Manhattan',
+      data: selectedConfig.data,
       elevationRange: [0, 3000],
-      // elevationScale: data && data.length ? 50 : 0,
       extruded: true,
-      getPosition: (d) => {
-        return [d.the_geom.coordinates[0], d.the_geom.coordinates[1]];
-      },
+      getPosition: selectedConfig.getPosition,
       pickable: true,
-      // radius,
-      // upperPercentile,
+      radius: 50,
       material: {
         ambient: 0.64,
         diffuse: 0.6,
         shininess: 32,
         specularColor: [51, 51, 51],
       },
-
       transitions: {
         elevationScale: 3000,
       },
@@ -34,11 +70,7 @@ export function Map({ mapboxAccessToken }: { mapboxAccessToken: string }) {
 
   return (
     <DeckGL
-      initialViewState={{
-        longitude: -122.4,
-        latitude: 37.8,
-        zoom: 14,
-      }}
+      initialViewState={selectedConfig.initialViewState}
       controller={true}
       layers={layers}
       style={{ width: '100%', height: '100%', position: 'relative' }}
