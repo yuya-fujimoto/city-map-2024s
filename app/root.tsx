@@ -14,12 +14,16 @@ import {
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 
 import appStylesHref from './app.css?url';
+import stylesheet from '~/tailwind.css?url';
+
+import { Toaster } from '~/components/ui/toaster';
 
 import { getCityData } from './data';
 import { useEffect } from 'react';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: appStylesHref },
+  { rel: 'stylesheet', href: stylesheet },
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -111,6 +115,7 @@ export default function App() {
         </div>
         <ScrollRestoration />
         <Scripts />
+        <Toaster />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 import MapGl from 'react-map-gl';
 import { DeckGL } from '@deck.gl/react';
 import { HexagonLayer } from '@deck.gl/aggregation-layers';
+import { useToast } from '~/hooks/use-toast';
 
 const glConfig: Record<
   'nyc' | 'sf',
@@ -12,10 +13,11 @@ const glConfig: Record<
     };
     data: string;
     getPosition: (d: any) => [number, number];
+    toastTitle: string;
   }
 > = {
   nyc: {
-    data: 'https://data.cityofnewyork.us/resource/5rq2-4hqu.json?$limit=1000&boroname=Manhattan',
+    data: 'https://data.cityofnewyork.us/resource/5rq2-4hqu.json?$limit=50000&boroname=Manhattan',
     getPosition: (d) => {
       return [d.the_geom.coordinates[0], d.the_geom.coordinates[1]];
     },
@@ -24,6 +26,7 @@ const glConfig: Record<
       latitude: 40.7454851,
       zoom: 11,
     },
+    toastTitle: 'Visualization data is now NYC',
   },
   sf: {
     data: 'https://data.sfgov.org/resource/5kya-mfst.json?$limit=1000',
@@ -35,6 +38,7 @@ const glConfig: Record<
       latitude: 37.7749,
       zoom: 11,
     },
+    toastTitle: 'Visualization data is now SF',
   },
 };
 
@@ -46,6 +50,7 @@ export function Map({
   cityDataId: 'nyc' | 'sf';
 }) {
   const selectedConfig = glConfig[cityDataId];
+  const { toast } = useToast();
 
   const layers = [
     new HexagonLayer<any>({
@@ -64,6 +69,12 @@ export function Map({
       },
       transitions: {
         elevationScale: 3000,
+      },
+      onDataLoad: () => {
+        toast({
+          title: selectedConfig.toastTitle,
+          description: 'The data has been loaded successfully',
+        });
       },
     }),
   ];
